@@ -1,4 +1,4 @@
-from charm4py import charm, coro, ray
+from charm4py import charm, ray
 import time
 
 # Recursive Parallel Fibonacci
@@ -10,8 +10,9 @@ import time
 # See fib-numba.py for a more efficient version where the grainsize can be
 # controlled and the sequential computation runs with Numba.
 
+# ray version
 
-@coro
+@ray.remote
 def fib(n):
     if n < 2:
         return n
@@ -19,7 +20,10 @@ def fib(n):
         # this will create two tasks which will be sent to distributed workers
         # (tasks can execute on any PE). map will block here for the result of
         # fib(n-1) and fib(n-2), which is why we mark fib as a coroutine
-        return sum(charm.pool.map(fib, [n-1, n-2]))
+        # return sum(charm.pool.map(fib, [n-1, n-2]))
+        result1 = fib.remote(n-1)
+        result2 = fib.remote(n-2)
+        return ray.get(result1)+ray.get(result2)
 
 
 def main(args):
@@ -30,8 +34,8 @@ def main(args):
         n = int(args[1])
     print('Calculating fibonacci of N=' + str(n))
     t0 = time.time()
-    result = fib(n)
-    print('Result is', result, 'elapsed=', round(time.time() - t0, 3))
+    result = fib.remote(n)
+    print('Result is', ray.get(result), 'elapsed=', round(time.time() - t0, 3))
     exit()
 
 

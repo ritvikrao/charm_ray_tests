@@ -7,7 +7,7 @@ class Worker(object):
         return
 
     def wait_test(self):
-        return
+        return 0
 
 
 def main(args):
@@ -15,7 +15,8 @@ def main(args):
     workers = [Worker.remote() for i in range(num_workers)]
     for i in range(num_workers):
         print("Spawning worker: ", i)
-        workers[i].wait_test.remote()
+        retval = workers[i].wait_test.remote()
+        print("Worker: ", i, " returned: ", ray.get(retval))
 
 
 main([])

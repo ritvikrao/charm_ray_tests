@@ -13,10 +13,9 @@ class Worker(object):
 def main(args):
     num_workers = 131072
     workers = [Worker.remote() for i in range(num_workers)]
+    retvals = [workers[i].wait_test.remote() for i in range(num_workers)]
     for i in range(num_workers):
-        print("Spawning worker: ", i)
-        retval = workers[i].wait_test.remote()
-        print("Worker: ", i, " returned: ", ray.get(retval))
+        print("Worker: ", i, " returned: ", ray.get(retvals[i]))
 
 
 main([])
